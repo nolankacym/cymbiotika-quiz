@@ -101,6 +101,33 @@ html, body {
   border-radius: 10px; text-align: center; padding: 0 3px;
 }
 
+/* Hamburger (mobile only — hidden on desktop) */
+.hdr-burger {
+  display: none;
+  background: none; border: 0; cursor: pointer; color: var(--q-ink);
+  padding: 0; width: 32px; height: 32px; align-items: center; justify-content: center;
+}
+.hdr-burger svg { display: block; }
+
+/* Mobile dropdown menu (rendered only when open; shown at <=1100px) */
+.hdr-menu {
+  display: none; flex-direction: column; gap: 4px;
+  background: var(--q-surface);
+  border-bottom: 1px solid var(--q-stroke);
+  padding: var(--sp-2) var(--sp-3);
+}
+.hdr-menu-link {
+  background: none; border: 0; cursor: pointer; text-align: left;
+  font-family: inherit; font-size: var(--q-body-1); font-weight: 500;
+  color: var(--q-green); letter-spacing: 0.16px;
+  padding: 12px 8px; border-radius: var(--q-radius);
+}
+.hdr-menu-link:hover { background: var(--q-neutral); }
+.hdr-menu-cta {
+  display: flex; flex-direction: column; gap: 8px;
+  padding-top: var(--sp-2); margin-top: 4px; border-top: 1px solid var(--q-stroke);
+}
+
 /* Buttons (shared) */
 .btn {
   font-family: inherit; font-size: var(--q-button); font-weight: 450;
@@ -297,8 +324,11 @@ html, body {
 
 /* ---------------------------------------------------------- Responsive */
 @media (max-width: 1100px) {
-  .hdr-nav, .hdr-cta { display: none; } /* tablet/mobile: collapse nav like Figma */
+  .hdr-nav, .hdr-cta { display: none; } /* tablet/mobile: collapse nav into the burger */
+  .hdr-burger { display: inline-flex; } /* show hamburger */
+  .hdr-menu { display: flex; }          /* dropdown panel (only in DOM when open) */
   .hdr { padding: var(--sp-2) var(--sp-3); }
+  .hdr-left { gap: var(--sp-2); }
   .ftr { gap: var(--sp-4); }
   .ftr-right { width: 100%; align-items: stretch; }
   .ftr-app { align-items: stretch; }
@@ -307,6 +337,8 @@ html, body {
   :root { --q-h2: 28px; }
   .q-stage { padding: var(--sp-4) var(--sp-3); }
   .q-back, .q-card, .q-done { width: 100%; }
+  .hdr-flag, .hdr-icons .hdr-icon:nth-child(2) { display: none; } /* drop flag + search to save room */
+  .hdr-actions { gap: var(--sp-2); }
   .ftr { padding: var(--sp-3); }
   .ftr-nav { gap: var(--sp-3); }
 }

@@ -75,6 +75,12 @@ const I = {
   plus: (s = 20) => (
     <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
   ),
+  hamburger: (s = 24) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+  ),
+  close: (s = 24) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+  ),
 };
 
 /* Money helper */
@@ -95,11 +101,20 @@ function makeId() {
 /* ------------------------------- Header ------------------------------ */
 function Header() {
   const links = ["Shop Best Sellers", "Shop by Benefit", "Learn", "Subscribe and Save"];
+  const [menuOpen, setMenuOpen] = useState(false);
   return (
     <header>
       <div className="promo-banner">20% off + Free Shipping with code GIFT</div>
       <div className="hdr">
         <div className="hdr-left">
+          <button
+            className={"hdr-burger" + (menuOpen ? " is-open" : "")}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((o) => !o)}
+          >
+            {menuOpen ? I.close() : I.hamburger()}
+          </button>
           <img className="hdr-wordmark" src="assets/wordmark-dark.svg" alt="Cymbiotika" />
           <nav className="hdr-nav">
             {links.map((l) => <button key={l} className="hdr-link">{l}</button>)}
@@ -120,6 +135,15 @@ function Header() {
           </div>
         </div>
       </div>
+      {menuOpen && (
+        <nav className="hdr-menu" onClick={() => setMenuOpen(false)}>
+          {links.map((l) => <button key={l} className="hdr-menu-link">{l}</button>)}
+          <div className="hdr-menu-cta">
+            <button className="btn btn-primary" style={{ width: "100%" }}>Shop All</button>
+            <button className="btn btn-outline" style={{ width: "100%" }}>Take the Quiz</button>
+          </div>
+        </nav>
+      )}
     </header>
   );
 }
@@ -204,7 +228,6 @@ function NameCard({ value, onChange, onNext, progress }) {
     <Stage progress={progress}>
       <form className="q-card" onSubmit={submit}>
         <div className="q-head">
-          <img className="q-brandmark" src="assets/brandmark-green.svg" alt="" />
           <h2 className="q-title">First, what should we call you?</h2>
           <p className="q-step">We’ll personalize your plan as we go.</p>
         </div>
@@ -240,7 +263,6 @@ function QuestionCard({ q, value, onToggle, onNext, onBack, canBack, stepLabel, 
     <Stage progress={progress} canBack={canBack} onBack={onBack}>
       <div className="q-card">
         <div className="q-head">
-          <img className="q-brandmark" src="assets/brandmark-green.svg" alt="" />
           {q.caption && <p className="q-caption">{q.caption}</p>}
           <h2 className="q-title">{q.title}</h2>
           {q.multi && (
@@ -507,7 +529,6 @@ function FeedbackCard({ name, onSubmit, submitting }) {
     <Stage progress={100}>
       <div className="q-card">
         <div className="q-head">
-          <img className="q-brandmark" src="assets/brandmark-green.svg" alt="" />
           <h2 className="q-title">How was your quiz experience?</h2>
           <p className="q-step">Your feedback helps us improve, {name}.</p>
         </div>
