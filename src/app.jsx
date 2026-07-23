@@ -263,7 +263,6 @@ function QuestionCard({ q, value, onToggle, onNext, onBack, canBack, stepLabel, 
     <Stage progress={progress} canBack={canBack} onBack={onBack}>
       <div className="q-card">
         <div className="q-head">
-          {q.caption && <p className="q-caption">{q.caption}</p>}
           <h2 className="q-title">{q.title}</h2>
           {q.multi && (
             <p className="q-step">{q.max ? "Select up to " + q.max : "Select all that apply"}</p>
