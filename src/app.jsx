@@ -226,9 +226,9 @@ function Stage({ progress, canBack, onBack, children }) {
     <React.Fragment>
       <div className="q-progress"><div className="q-progress-fill" style={{ width: progress + "%" }} /></div>
       <div className="q-stage">
-        {onBack && (
+        {onBack && canBack && (
           <div className="q-back">
-            <button onClick={onBack} disabled={!canBack} aria-label="Back">{I.chevronLeft()}</button>
+            <button onClick={onBack} aria-label="Back">{I.chevronLeft()}</button>
           </div>
         )}
         {children}

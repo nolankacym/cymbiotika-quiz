@@ -1542,11 +1542,10 @@ function Stage({
     }
   })), /*#__PURE__*/React.createElement("div", {
     className: "q-stage"
-  }, onBack && /*#__PURE__*/React.createElement("div", {
+  }, onBack && canBack && /*#__PURE__*/React.createElement("div", {
     className: "q-back"
   }, /*#__PURE__*/React.createElement("button", {
     onClick: onBack,
-    disabled: !canBack,
     "aria-label": "Back"
   }, I.chevronLeft())), children));
 }
