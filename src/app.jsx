@@ -300,9 +300,7 @@ function QuestionCard({ q, value, onToggle, onNext, onBack, canBack, stepLabel, 
                 aria-checked={isSel}
                 onClick={() => pick(opt)}
               >
-                {opt}
-                <span className="q-check">{I.check()}</span>
-              </button>
+                {opt}              </button>
             );
           })}
         </div>
@@ -578,9 +576,7 @@ function FeedbackCard({ onSubmit, submitting }) {
                 className={"q-option" + (ease === opt ? " is-selected" : "")}
                 onClick={() => setEase(opt)}
               >
-                {opt}
-                <span className="q-check">{I.check()}</span>
-              </button>
+                {opt}              </button>
             ))}
           </div>
         </div>

@@ -232,12 +232,6 @@ html, body {
   background: rgba(22,63,53,.04);
   box-shadow: inset 0 0 0 1px var(--q-green);
 }
-.q-option .q-check {
-  position: absolute; right: var(--sp-2); top: 50%; transform: translateY(-50%);
-  width: 20px; height: 20px; color: var(--q-green);
-  opacity: 0; transition: opacity .15s ease;
-}
-.q-option.is-selected .q-check { opacity: 1; }
 
 .q-next { width: 100%; }
 .q-hint {
@@ -1637,9 +1631,7 @@ function QuestionCard({
       role: q.multi ? "checkbox" : "radio",
       "aria-checked": isSel,
       onClick: () => pick(opt)
-    }, opt, /*#__PURE__*/React.createElement("span", {
-      className: "q-check"
-    }, I.check()));
+    }, opt, "              ");
   })), q.multi && /*#__PURE__*/React.createElement("button", {
     className: "btn btn-primary q-next",
     disabled: !canNext,
@@ -1976,9 +1968,7 @@ function FeedbackCard({
     type: "button",
     className: "q-option" + (ease === opt ? " is-selected" : ""),
     onClick: () => setEase(opt)
-  }, opt, /*#__PURE__*/React.createElement("span", {
-    className: "q-check"
-  }, I.check()))))), /*#__PURE__*/React.createElement("div", {
+  }, opt, "              ")))), /*#__PURE__*/React.createElement("div", {
     className: "q-fb-block"
   }, /*#__PURE__*/React.createElement("span", {
     className: "q-fb-label"
