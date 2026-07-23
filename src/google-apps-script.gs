@@ -19,12 +19,12 @@
  */
 
 var RESPONSE_FIELDS = [
-  "submission_id", "timestamp", "name",
+  "submission_id", "timestamp", "email",
   "focus", "wishlist", "feeling", "barriers", "experience",
   "routine_now", "flags", "commitment", "begin", "mindset",
   "dd_energy", "dd_gut", "dd_stress", "dd_beauty", "dd_other"
 ];
-var FEEDBACK_FIELDS = ["submission_id", "timestamp", "name", "rating", "ease", "comment"];
+var FEEDBACK_FIELDS = ["submission_id", "timestamp", "email", "rating", "ease", "comment"];
 
 function doPost(e) {
   var lock = LockService.getScriptLock();
@@ -57,6 +57,15 @@ function appendRow(sheetName, fields, data) {
     sheet.appendRow(fields);
     sheet.getRange(1, 1, 1, fields.length).setFontWeight("bold");
     sheet.setFrozenRows(1);
+  } else {
+    // Self-heal the header row if the schema changed (e.g. name -> email).
+    var lastCol = sheet.getLastColumn();
+    var header = lastCol ? sheet.getRange(1, 1, 1, Math.max(lastCol, fields.length)).getValues()[0] : [];
+    var mismatch = fields.some(function (f, i) { return header[i] !== f; });
+    if (mismatch) {
+      sheet.getRange(1, 1, 1, fields.length).setValues([fields]).setFontWeight("bold");
+      sheet.setFrozenRows(1);
+    }
   }
   var row = fields.map(function (k) {
     var v = data[k];

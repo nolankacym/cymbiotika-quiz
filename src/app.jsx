@@ -1,6 +1,6 @@
 /* app.jsx — Cymbiotika Quiz
    Data-driven multi-step quiz built from Figma "Quiz" (node 2614:53897).
-   Flow: name → 10 Basics → 1 conditional deep-dive (branched off the primary
+   Flow: 10 Basics → 1 conditional deep-dive (branched off the primary
    focus in Q1) → summary → feedback → thanks. Completed quizzes are POSTed to
    the server and appended to responses.csv; feedback goes to feedback.csv. */
 
@@ -237,27 +237,30 @@ function Stage({ progress, canBack, onBack, children }) {
   );
 }
 
-/* ------------------------------ Name step ---------------------------- */
-function NameCard({ value, onChange, onNext, progress }) {
-  const canNext = value.trim().length > 0;
-  function submit(e) { e.preventDefault(); if (canNext) onNext(); }
+/* ------------------------------ Email step --------------------------- */
+/* Final step — collects the email, then submits the quiz and shows results. */
+function EmailCard({ value, onChange, onSubmit, onBack, canBack, progress, submitting }) {
+  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+  function submit(e) { e.preventDefault(); if (valid && !submitting) onSubmit(); }
   return (
-    <Stage progress={progress}>
+    <Stage progress={progress} canBack={canBack} onBack={onBack}>
       <form className="q-card" onSubmit={submit}>
         <div className="q-head">
-          <h2 className="q-title">What is your name?</h2>
+          <h2 className="q-title">Where should we send your results?</h2>
         </div>
         <div className="q-options">
           <input
             className="q-input"
-            type="text"
-            placeholder="Your first name"
+            type="email"
+            placeholder="you@email.com"
             value={value}
             autoFocus
             onChange={(e) => onChange(e.target.value)}
           />
         </div>
-        <button type="submit" className="btn btn-primary q-next" disabled={!canNext}>Next</button>
+        <button type="submit" className="btn btn-primary q-next" disabled={!valid || submitting}>
+          {submitting ? "Building your plan…" : "See my plan"}
+        </button>
       </form>
     </Stage>
   );
@@ -380,7 +383,7 @@ function ProductCard({ product, badge, badgeKind, variant, plan, qty, onPlan, on
   );
 }
 
-function ResultsPage({ name, answers, onStartOver, onFeedback, saveState }) {
+function ResultsPage({ answers, onStartOver, onFeedback, saveState }) {
   // Derive goals + recommendations from the user's real answers.
   const picks = [];
   (answers.focus || []).concat(answers.wishlist || []).forEach((a) => {
@@ -425,7 +428,7 @@ function ResultsPage({ name, answers, onStartOver, onFeedback, saveState }) {
       <button className="rp-startover" onClick={onStartOver}>{I.uturn()} Start Over</button>
 
       <div className="rp-hero">
-        <h1 className="rp-title">Here’s your personalized supplement plan{name ? ", " + name : ""}</h1>
+        <h1 className="rp-title">Here’s your personalized supplement plan</h1>
         <p className="rp-sub">We’ve created this custom bundle based on your goals, lifestyle, and dietary habits.
           We’re here to support you on your journey to reach optimal health.</p>
       </div>
@@ -530,7 +533,7 @@ function ResultsPage({ name, answers, onStartOver, onFeedback, saveState }) {
 }
 
 /* ----------------------------- Feedback ------------------------------ */
-function FeedbackCard({ name, onSubmit, submitting }) {
+function FeedbackCard({ onSubmit, submitting }) {
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [ease, setEase] = useState("");
@@ -543,7 +546,7 @@ function FeedbackCard({ name, onSubmit, submitting }) {
       <div className="q-card">
         <div className="q-head">
           <h2 className="q-title">How was your quiz experience?</h2>
-          <p className="q-step">Your feedback helps us improve, {name}.</p>
+          <p className="q-step">Your feedback helps us improve.</p>
         </div>
 
         <div className="q-fb-block">
@@ -605,12 +608,12 @@ function FeedbackCard({ name, onSubmit, submitting }) {
 }
 
 /* ------------------------------ Thanks ------------------------------- */
-function Thanks({ name, saveState, onRestart }) {
+function Thanks({ saveState, onRestart }) {
   return (
     <Stage progress={100}>
       <div className="q-done">
         <img className="q-brandmark" src="assets/brandmark-green.svg" alt="" style={{ width: 40, height: 40 }} />
-        <h2 className="q-title">Thank you, {name}!</h2>
+        <h2 className="q-title">Thank you!</h2>
         <p className="q-step">
           {saveState === "saved" ? "Your feedback was saved to feedback.csv." : "We appreciate you taking the time."}
         </p>
@@ -622,8 +625,9 @@ function Thanks({ name, saveState, onRestart }) {
 
 /* ------------------------------- App --------------------------------- */
 function App() {
-  const [stage, setStage] = useState("name"); // name | quiz | complete | feedback | thanks
-  const [name, setName] = useState("");
+  const [stage, setStage] = useState("quiz"); // quiz | email | complete | feedback | thanks
+  const [email, setEmail] = useState("");
+  const emailRef = useRef("");
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState({}); // { [id]: [labels] }
   const [respSave, setRespSave] = useState("idle");
@@ -663,11 +667,11 @@ function App() {
 
   const q = questions[idx];
   const total = questions.length;
-  // Progress across: name (1) + questions (total). Complete/feedback/thanks = 100.
+  // Progress across: questions (total) + email (1). Complete/feedback/thanks = 100.
   const steps = total + 1;
   let progress = 100;
-  if (stage === "name") progress = Math.round((0 / steps) * 100);
-  else if (stage === "quiz") progress = Math.round(((idx + 1) / steps) * 100);
+  if (stage === "quiz") progress = Math.round(((idx + 1) / steps) * 100);
+  else if (stage === "email") progress = Math.round((total / steps) * 100);
 
   function toggle(opt) {
     setAnswers((prev) => {
@@ -696,7 +700,7 @@ function App() {
     return {
       submission_id: idRef.current,
       timestamp: new Date().toISOString(),
-      name: name,
+      email: emailRef.current,
       focus: a.focus || [],
       wishlist: a.wishlist || [],
       feeling: a.feeling || [],
@@ -734,7 +738,7 @@ function App() {
   }
 
   function goNext() {
-    if (idx + 1 >= questions.length) finishQuiz();
+    if (idx + 1 >= questions.length) setStage("email"); // email is the final step
     else setIdx(idx + 1);
   }
   function goBack() { if (idx > 0) setIdx(idx - 1); }
@@ -743,7 +747,7 @@ function App() {
     const payload = {
       submission_id: idRef.current,
       timestamp: new Date().toISOString(),
-      name: name,
+      email: emailRef.current,
       rating: fb.rating,
       ease: fb.ease,
       comment: fb.comment,
@@ -766,7 +770,7 @@ function App() {
   }
 
   function restart() {
-    setStage("name"); setName(""); setIdx(0); setAnswers({}); answersRef.current = {};
+    setStage("quiz"); setEmail(""); emailRef.current = ""; setIdx(0); setAnswers({}); answersRef.current = {};
     setRespSave("idle"); setFbSave("idle"); setFbSubmitting(false);
     idRef.current = makeId();
   }
@@ -774,10 +778,6 @@ function App() {
   return (
     <div className="quiz-app">
       <Header />
-
-      {stage === "name" && (
-        <NameCard value={name} onChange={setName} onNext={() => setStage("quiz")} progress={progress} />
-      )}
 
       {stage === "quiz" && (
         <QuestionCard
@@ -792,9 +792,20 @@ function App() {
         />
       )}
 
+      {stage === "email" && (
+        <EmailCard
+          value={email}
+          onChange={(v) => { setEmail(v); emailRef.current = v; }}
+          onSubmit={finishQuiz}
+          onBack={() => setStage("quiz")}
+          canBack={true}
+          submitting={respSave === "saving"}
+          progress={progress}
+        />
+      )}
+
       {stage === "complete" && (
         <ResultsPage
-          name={name}
           answers={answers}
           onStartOver={restart}
           onFeedback={() => setStage("feedback")}
@@ -803,11 +814,11 @@ function App() {
       )}
 
       {stage === "feedback" && (
-        <FeedbackCard name={name} onSubmit={submitFeedback} submitting={fbSubmitting} />
+        <FeedbackCard onSubmit={submitFeedback} submitting={fbSubmitting} />
       )}
 
       {stage === "thanks" && (
-        <Thanks name={name} saveState={fbSave} onRestart={restart} />
+        <Thanks saveState={fbSave} onRestart={restart} />
       )}
 
       <Footer />

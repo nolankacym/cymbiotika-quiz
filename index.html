@@ -1083,7 +1083,7 @@ window.GOAL_CHIP = {
 </script>
 <script>/* app.jsx — Cymbiotika Quiz
    Data-driven multi-step quiz built from Figma "Quiz" (node 2614:53897).
-   Flow: name → 10 Basics → 1 conditional deep-dive (branched off the primary
+   Flow: 10 Basics → 1 conditional deep-dive (branched off the primary
    focus in Q1) → summary → feedback → thanks. Completed quizzes are POSTed to
    the server and appended to responses.csv; feedback goes to feedback.csv. */
 
@@ -1551,20 +1551,26 @@ function Stage({
   }, I.chevronLeft())), children));
 }
 
-/* ------------------------------ Name step ---------------------------- */
-function NameCard({
+/* ------------------------------ Email step --------------------------- */
+/* Final step — collects the email, then submits the quiz and shows results. */
+function EmailCard({
   value,
   onChange,
-  onNext,
-  progress
+  onSubmit,
+  onBack,
+  canBack,
+  progress,
+  submitting
 }) {
-  const canNext = value.trim().length > 0;
+  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
   function submit(e) {
     e.preventDefault();
-    if (canNext) onNext();
+    if (valid && !submitting) onSubmit();
   }
   return /*#__PURE__*/React.createElement(Stage, {
-    progress: progress
+    progress: progress,
+    canBack: canBack,
+    onBack: onBack
   }, /*#__PURE__*/React.createElement("form", {
     className: "q-card",
     onSubmit: submit
@@ -1572,20 +1578,20 @@ function NameCard({
     className: "q-head"
   }, /*#__PURE__*/React.createElement("h2", {
     className: "q-title"
-  }, "What is your name?")), /*#__PURE__*/React.createElement("div", {
+  }, "Where should we send your results?")), /*#__PURE__*/React.createElement("div", {
     className: "q-options"
   }, /*#__PURE__*/React.createElement("input", {
     className: "q-input",
-    type: "text",
-    placeholder: "Your first name",
+    type: "email",
+    placeholder: "you@email.com",
     value: value,
     autoFocus: true,
     onChange: e => onChange(e.target.value)
   })), /*#__PURE__*/React.createElement("button", {
     type: "submit",
     className: "btn btn-primary q-next",
-    disabled: !canNext
-  }, "Next")));
+    disabled: !valid || submitting
+  }, submitting ? "Building your plan…" : "See my plan")));
 }
 
 /* --------------------------- Question card --------------------------- */
@@ -1749,7 +1755,6 @@ function ProductCard({
   }, variant === "hero" ? inRoutine ? "Remove" : "Add to routine" : inRoutine ? "Added ✓" : "Select"))));
 }
 function ResultsPage({
-  name,
   answers,
   onStartOver,
   onFeedback,
@@ -1813,7 +1818,7 @@ function ResultsPage({
     className: "rp-hero"
   }, /*#__PURE__*/React.createElement("h1", {
     className: "rp-title"
-  }, "Here\u2019s your personalized supplement plan", name ? ", " + name : ""), /*#__PURE__*/React.createElement("p", {
+  }, "Here\u2019s your personalized supplement plan"), /*#__PURE__*/React.createElement("p", {
     className: "rp-sub"
   }, "We\u2019ve created this custom bundle based on your goals, lifestyle, and dietary habits. We\u2019re here to support you on your journey to reach optimal health.")), /*#__PURE__*/React.createElement("div", {
     className: "rp-divider"
@@ -1927,7 +1932,6 @@ function ResultsPage({
 
 /* ----------------------------- Feedback ------------------------------ */
 function FeedbackCard({
-  name,
   onSubmit,
   submitting
 }) {
@@ -1947,7 +1951,7 @@ function FeedbackCard({
     className: "q-title"
   }, "How was your quiz experience?"), /*#__PURE__*/React.createElement("p", {
     className: "q-step"
-  }, "Your feedback helps us improve, ", name, ".")), /*#__PURE__*/React.createElement("div", {
+  }, "Your feedback helps us improve.")), /*#__PURE__*/React.createElement("div", {
     className: "q-fb-block"
   }, /*#__PURE__*/React.createElement("span", {
     className: "q-fb-label"
@@ -1997,7 +2001,6 @@ function FeedbackCard({
 
 /* ------------------------------ Thanks ------------------------------- */
 function Thanks({
-  name,
   saveState,
   onRestart
 }) {
@@ -2015,7 +2018,7 @@ function Thanks({
     }
   }), /*#__PURE__*/React.createElement("h2", {
     className: "q-title"
-  }, "Thank you, ", name, "!"), /*#__PURE__*/React.createElement("p", {
+  }, "Thank you!"), /*#__PURE__*/React.createElement("p", {
     className: "q-step"
   }, saveState === "saved" ? "Your feedback was saved to feedback.csv." : "We appreciate you taking the time."), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-outline q-next",
@@ -2025,8 +2028,9 @@ function Thanks({
 
 /* ------------------------------- App --------------------------------- */
 function App() {
-  const [stage, setStage] = useState("name"); // name | quiz | complete | feedback | thanks
-  const [name, setName] = useState("");
+  const [stage, setStage] = useState("quiz"); // quiz | email | complete | feedback | thanks
+  const [email, setEmail] = useState("");
+  const emailRef = useRef("");
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState({}); // { [id]: [labels] }
   const [respSave, setRespSave] = useState("idle");
@@ -2065,10 +2069,10 @@ function App() {
   }, [answers]);
   const q = questions[idx];
   const total = questions.length;
-  // Progress across: name (1) + questions (total). Complete/feedback/thanks = 100.
+  // Progress across: questions (total) + email (1). Complete/feedback/thanks = 100.
   const steps = total + 1;
   let progress = 100;
-  if (stage === "name") progress = Math.round(0 / steps * 100);else if (stage === "quiz") progress = Math.round((idx + 1) / steps * 100);
+  if (stage === "quiz") progress = Math.round((idx + 1) / steps * 100);else if (stage === "email") progress = Math.round(total / steps * 100);
   function toggle(opt) {
     setAnswers(prev => {
       const cur = prev[q.id] ? prev[q.id].slice() : [];
@@ -2097,7 +2101,7 @@ function App() {
     return {
       submission_id: idRef.current,
       timestamp: new Date().toISOString(),
-      name: name,
+      email: emailRef.current,
       focus: a.focus || [],
       wishlist: a.wishlist || [],
       feeling: a.feeling || [],
@@ -2132,7 +2136,8 @@ function App() {
     postJSON("/api/submit", row).then(r => setRespSave(r && r.ok ? "saved" : "error")).catch(() => setRespSave("error"));
   }
   function goNext() {
-    if (idx + 1 >= questions.length) finishQuiz();else setIdx(idx + 1);
+    if (idx + 1 >= questions.length) setStage("email"); // email is the final step
+    else setIdx(idx + 1);
   }
   function goBack() {
     if (idx > 0) setIdx(idx - 1);
@@ -2141,7 +2146,7 @@ function App() {
     const payload = {
       submission_id: idRef.current,
       timestamp: new Date().toISOString(),
-      name: name,
+      email: emailRef.current,
       rating: fb.rating,
       ease: fb.ease,
       comment: fb.comment
@@ -2171,8 +2176,9 @@ function App() {
     });
   }
   function restart() {
-    setStage("name");
-    setName("");
+    setStage("quiz");
+    setEmail("");
+    emailRef.current = "";
     setIdx(0);
     setAnswers({});
     answersRef.current = {};
@@ -2183,12 +2189,7 @@ function App() {
   }
   return /*#__PURE__*/React.createElement("div", {
     className: "quiz-app"
-  }, /*#__PURE__*/React.createElement(Header, null), stage === "name" && /*#__PURE__*/React.createElement(NameCard, {
-    value: name,
-    onChange: setName,
-    onNext: () => setStage("quiz"),
-    progress: progress
-  }), stage === "quiz" && /*#__PURE__*/React.createElement(QuestionCard, {
+  }, /*#__PURE__*/React.createElement(Header, null), stage === "quiz" && /*#__PURE__*/React.createElement(QuestionCard, {
     q: q,
     value: answers[q.id],
     onToggle: toggle,
@@ -2197,18 +2198,26 @@ function App() {
     canBack: idx > 0,
     stepLabel: "Question " + (idx + 1) + " of " + total,
     progress: progress
+  }), stage === "email" && /*#__PURE__*/React.createElement(EmailCard, {
+    value: email,
+    onChange: v => {
+      setEmail(v);
+      emailRef.current = v;
+    },
+    onSubmit: finishQuiz,
+    onBack: () => setStage("quiz"),
+    canBack: true,
+    submitting: respSave === "saving",
+    progress: progress
   }), stage === "complete" && /*#__PURE__*/React.createElement(ResultsPage, {
-    name: name,
     answers: answers,
     onStartOver: restart,
     onFeedback: () => setStage("feedback"),
     saveState: respSave
   }), stage === "feedback" && /*#__PURE__*/React.createElement(FeedbackCard, {
-    name: name,
     onSubmit: submitFeedback,
     submitting: fbSubmitting
   }), stage === "thanks" && /*#__PURE__*/React.createElement(Thanks, {
-    name: name,
     saveState: fbSave,
     onRestart: restart
   }), /*#__PURE__*/React.createElement(Footer, null));
