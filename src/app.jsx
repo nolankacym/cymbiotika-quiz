@@ -107,14 +107,6 @@ function Header() {
       <div className="promo-banner">20% off + Free Shipping with code GIFT</div>
       <div className="hdr">
         <div className="hdr-left">
-          <button
-            className={"hdr-burger" + (menuOpen ? " is-open" : "")}
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((o) => !o)}
-          >
-            {menuOpen ? I.close() : I.hamburger()}
-          </button>
           <img className="hdr-wordmark" src="assets/wordmark-dark.svg" alt="Cymbiotika" />
           <nav className="hdr-nav">
             {links.map((l) => <button key={l} className="hdr-link">{l}</button>)}
@@ -123,16 +115,24 @@ function Header() {
         <div className="hdr-actions">
           <div className="hdr-cta">
             <button className="btn btn-primary">Shop All</button>
-            <button className="btn btn-outline">Take the Quiz</button>
+            <button className="btn btn-outline hdr-cta-quiz">Take the Quiz</button>
           </div>
           <div className="hdr-icons">
             <span className="hdr-icon hdr-flag" title="United States">
               <svg width="24" height="24" viewBox="0 0 24 24"><rect width="24" height="24" fill="#b22234" /><rect width="24" height="1.85" y="1.85" fill="#fff" /><rect width="24" height="1.85" y="5.5" fill="#fff" /><rect width="24" height="1.85" y="9.2" fill="#fff" /><rect width="10" height="9.2" fill="#3c3b6e" /></svg>
             </span>
             <span className="hdr-icon">{I.search()}</span>
-            <span className="hdr-icon">{I.user()}</span>
+            <span className="hdr-icon hdr-user">{I.user()}</span>
             <span className="hdr-icon">{I.bag()}<span className="hdr-bag-count">1</span></span>
           </div>
+          <button
+            className={"hdr-burger" + (menuOpen ? " is-open" : "")}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((o) => !o)}
+          >
+            {menuOpen ? I.close() : I.hamburger()}
+          </button>
         </div>
       </div>
       {menuOpen && (
@@ -228,8 +228,7 @@ function NameCard({ value, onChange, onNext, progress }) {
     <Stage progress={progress}>
       <form className="q-card" onSubmit={submit}>
         <div className="q-head">
-          <h2 className="q-title">First, what should we call you?</h2>
-          <p className="q-step">We’ll personalize your plan as we go.</p>
+          <h2 className="q-title">What is your name?</h2>
         </div>
         <div className="q-options">
           <input
@@ -265,7 +264,7 @@ function QuestionCard({ q, value, onToggle, onNext, onBack, canBack, stepLabel, 
         <div className="q-head">
           <h2 className="q-title">{q.title}</h2>
           {q.multi && (
-            <p className="q-step">{q.max ? "Select up to " + q.max : "Select all that apply"}</p>
+            <p className="q-overline">{q.max ? "Select up to " + q.max : "Select all that apply"}</p>
           )}
         </div>
 
@@ -373,12 +372,10 @@ function ResultsPage({ name, answers, onStartOver, onFeedback, saveState }) {
   const focus = (answers.focus && answers.focus[0]) || "Overall wellness + immunity";
   const chips = picks.map((a) => GOAL_CHIP[a] || a);
 
-  const topMatch = PRODUCTS[focus];
-  // Enhance = other picked areas, else fill from remaining catalog, up to 2.
-  const otherKeys = picks.filter((a) => a !== focus);
-  const fillKeys = Object.keys(PRODUCTS).filter((k) => k !== focus && otherKeys.indexOf(k) === -1);
-  const enhanceKeys = otherKeys.concat(fillKeys).slice(0, 2);
-  const enhance = enhanceKeys.map((k) => PRODUCTS[k]);
+  // Top Match is chosen by the primary focus; the other two products enhance.
+  const topId = FOCUS_TO_PRODUCT[focus] || "glutathione";
+  const topMatch = PRODUCTS[topId];
+  const enhance = Object.keys(PRODUCTS).filter((k) => k !== topId).map((k) => PRODUCTS[k]);
 
   // All products shown (unique ids) → routine lookup.
   const shown = [topMatch].concat(enhance);

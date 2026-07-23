@@ -217,46 +217,44 @@ window.CONDITIONALS = {
 };
 
 /* =========================================================================
-   Results page — product catalog
-   Maps each focus area to a recommended Cymbiotika-style product. Prices are
-   { oneTime, subscribe(≈-10%) }. `img` references quiz/assets flatlays.
+   Results page — product catalog (3 real products, keyed by id).
+   Name ↔ image pairing is fixed:
+     Liposomal Glutathione  → teal flatlay
+     Advanced Creatine      → orange flatlay
+     Liposomal Vitamin C    → red-orange flatlay
+   Prices are { oneTime, subscribe (≈ -10-20%) }.
    ========================================================================= */
 window.PRODUCTS = {
-  "Energy + focus": {
-    id: "energy",
-    name: "Liposomal B12 + B6",
-    oneTime: 80, subscribe: 64,
-    img: "assets/prod-glutathione.png",
-    blurb: "Fast-absorbing B vitamins for steady, all-day energy and mental clarity — without the crash.",
-  },
-  "Gut health + comfort": {
-    id: "gut",
-    name: "Gut Health Probiotic",
-    oneTime: 82, subscribe: 66,
-    img: "assets/prod-creatine.png",
-    blurb: "Targeted probiotics to ease bloating and support a balanced, comfortable digestive system.",
-  },
-  "Stress, sleep + mood": {
-    id: "sleep",
-    name: "Magnesium L-Threonate",
-    oneTime: 65, subscribe: 52,
-    img: "assets/prod-vitaminc.png",
-    blurb: "Highly bioavailable magnesium to calm the mind, ease stress, and support restful sleep.",
-  },
-  "Beauty, aging + longevity": {
-    id: "beauty",
+  glutathione: {
+    id: "glutathione",
     name: "Liposomal Glutathione",
     oneTime: 88, subscribe: 79,
     img: "assets/prod-glutathione.png",
     blurb: "The master antioxidant for skin radiance, gentle detox, and healthy cellular aging.",
   },
-  "Overall wellness + immunity": {
-    id: "immunity",
+  creatine: {
+    id: "creatine",
+    name: "Advanced Creatine",
+    oneTime: 62, subscribe: 50,
+    img: "assets/prod-creatine.png",
+    blurb: "Clinically-dosed creatine for strength, recovery, and sustained physical and mental energy.",
+  },
+  vitaminc: {
+    id: "vitaminc",
     name: "Liposomal Vitamin C",
     oneTime: 78, subscribe: 62,
     img: "assets/prod-vitaminc.png",
     blurb: "Immune-supporting vitamin C with superior liposomal absorption for daily defense.",
   },
+};
+
+/* Which product is the "Top Match" for each primary focus area (Q1). */
+window.FOCUS_TO_PRODUCT = {
+  "Energy + focus": "creatine",
+  "Gut health + comfort": "glutathione",
+  "Stress, sleep + mood": "glutathione",
+  "Beauty, aging + longevity": "glutathione",
+  "Overall wellness + immunity": "vitaminc",
 };
 
 /* Short chip labels for the "Your goals" row on the results page. */

@@ -86,7 +86,7 @@ html, body {
 }
 .hdr-link:hover { background: var(--q-neutral); }
 /* Navbar CTA buttons (Shop All / Take the Quiz) — heavier like the links */
-.hdr .btn { font-weight: 500; }
+.hdr .btn { font-weight: 500; white-space: nowrap; }
 
 .hdr-actions { display: flex; align-items: center; gap: var(--sp-3); }
 .hdr-cta { display: flex; align-items: center; gap: var(--sp-2); }
@@ -189,6 +189,12 @@ html, body {
 }
 .q-step {
   font-size: var(--q-caption); letter-spacing: 0.12px;
+  color: var(--q-ink-60); margin: 0;
+}
+/* Overline — small uppercase, tracked-out label (e.g. "SELECT UP TO 2") */
+.q-overline {
+  font-size: var(--q-caption); font-weight: 500;
+  text-transform: uppercase; letter-spacing: 1.2px;
   color: var(--q-ink-60); margin: 0;
 }
 
@@ -324,11 +330,14 @@ html, body {
 
 /* ---------------------------------------------------------- Responsive */
 @media (max-width: 1100px) {
-  .hdr-nav, .hdr-cta { display: none; } /* tablet/mobile: collapse nav into the burger */
-  .hdr-burger { display: inline-flex; } /* show hamburger */
-  .hdr-menu { display: flex; }          /* dropdown panel (only in DOM when open) */
+  /* Match Figma mobile header: wordmark · Shop All · search · bag · hamburger */
+  .hdr-nav { display: none; }            /* nav links collapse into the burger */
+  .hdr-cta-quiz { display: none; }       /* keep only "Shop All" in the bar */
+  .hdr-flag, .hdr-user { display: none; }/* no flag / account icon on mobile */
+  .hdr-burger { display: inline-flex; }  /* hamburger, far right */
+  .hdr-menu { display: flex; }           /* dropdown panel (only in DOM when open) */
   .hdr { padding: var(--sp-2) var(--sp-3); }
-  .hdr-left { gap: var(--sp-2); }
+  .hdr-actions { gap: var(--sp-2); }
   .ftr { gap: var(--sp-4); }
   .ftr-right { width: 100%; align-items: stretch; }
   .ftr-app { align-items: stretch; }
@@ -337,8 +346,12 @@ html, body {
   :root { --q-h2: 28px; }
   .q-stage { padding: var(--sp-4) var(--sp-3); }
   .q-back, .q-card, .q-done { width: 100%; }
-  .hdr-flag, .hdr-icons .hdr-icon:nth-child(2) { display: none; } /* drop flag + search to save room */
-  .hdr-actions { gap: var(--sp-2); }
+  /* Compact mobile header so wordmark + Shop All + icons + burger fit one row */
+  .hdr { gap: var(--sp-2); padding: var(--sp-2); }
+  .hdr-wordmark { height: 13px; }
+  .hdr .btn { height: 36px; padding: 0 12px; }
+  .hdr-actions { gap: 12px; }
+  .hdr-icons { gap: 12px; }
   .ftr { padding: var(--sp-3); }
   .ftr-nav { gap: var(--sp-3); }
 }
