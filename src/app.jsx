@@ -241,7 +241,8 @@ function Stage({ progress, canBack, onBack, children }) {
 /* Final step — collects the email, then submits the quiz and shows results. */
 function EmailCard({ value, onChange, onSubmit, onBack, canBack, progress, submitting }) {
   const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
-  function submit(e) { e.preventDefault(); if (valid && !submitting) onSubmit(); }
+  // Pass the trimmed value up so submission never depends on onChange timing.
+  function submit(e) { e.preventDefault(); if (valid && !submitting) onSubmit(value.trim()); }
   return (
     <Stage progress={progress} canBack={canBack} onBack={onBack}>
       <form className="q-card" onSubmit={submit}>
@@ -796,7 +797,7 @@ function App() {
         <EmailCard
           value={email}
           onChange={(v) => { setEmail(v); emailRef.current = v; }}
-          onSubmit={finishQuiz}
+          onSubmit={(em) => { setEmail(em); emailRef.current = em; finishQuiz(); }}
           onBack={() => setStage("quiz")}
           canBack={true}
           submitting={respSave === "saving"}

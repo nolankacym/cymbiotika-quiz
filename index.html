@@ -1562,9 +1562,10 @@ function EmailCard({
   submitting
 }) {
   const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+  // Pass the trimmed value up so submission never depends on onChange timing.
   function submit(e) {
     e.preventDefault();
-    if (valid && !submitting) onSubmit();
+    if (valid && !submitting) onSubmit(value.trim());
   }
   return /*#__PURE__*/React.createElement(Stage, {
     progress: progress,
@@ -2203,7 +2204,11 @@ function App() {
       setEmail(v);
       emailRef.current = v;
     },
-    onSubmit: finishQuiz,
+    onSubmit: em => {
+      setEmail(em);
+      emailRef.current = em;
+      finishQuiz();
+    },
     onBack: () => setStage("quiz"),
     canBack: true,
     submitting: respSave === "saving",
